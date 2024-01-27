@@ -20,11 +20,64 @@ const string connectionString = "server=localhost\\sqlexpress;database=balta;tru
 //   }
 // }
 
+
 using (var connection = new SqlConnection(connectionString))
 {
-  var categories = connection.Query<Category>("SELECT [Id], [Title] FROM [Category]");
-  foreach (var category in categories)
+  UpdateCategory(connection);
+  ListCategories(connection);
+  // CreateCategory(connection);  
+}
+
+static void ListCategories(SqlConnection connection)
   {
-    Console.WriteLine($"{category.Id} - {category.Title}");
+    var categories = connection.Query<Category>("SELECT [Id], [Title] FROM [Category]");
+
+    foreach (var item in categories)
+    {
+      Console.WriteLine($"{item.Id} - {item.Title}");
+    }
   }
+
+static void CreateCategory(SqlConnection connection)
+  {
+    var category = new Category();
+    category.Id = Guid.NewGuid();
+    category.Title = "Amazon AWS";
+    category.Url = "amazon";
+    category.Summary = "AWS Cloud";
+    category.Order = 8;
+    category.Description = "Categoria destinada a serviços do AWS";
+    category.Featured = false;
+
+    var insertSql = @"INSERT INTO 
+                        [Category] 
+                      VALUES 
+                        (@Id, @Title, @Url, @Summary, @Order, @Description, @Featured)";
+
+    var rows = connection.Execute(insertSql, new 
+    {
+      category.Id,
+      category.Title,
+      category.Url,
+      category.Summary,
+      category.Order,
+      category.Description,
+      category.Featured
+    });
+  }
+
+static void UpdateCategory(SqlConnection connection)
+{
+  var updateCategory = "UPDATE [Category] SET [Title] = @title WHERE [Id] = @id";
+  var rows = connection.Execute(updateCategory, new 
+    {
+      id = new Guid("99CEB1F4-8A24-47F3-9E75-C15212FE4E08"),
+      title = "AWS Amazon"
+    }
+  );
+}
+
+static void DeleteCategory(SqlConnection connection)
+{
+
 }
