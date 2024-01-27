@@ -23,9 +23,10 @@ const string connectionString = "server=localhost\\sqlexpress;database=balta;tru
 
 using (var connection = new SqlConnection(connectionString))
 {
-  UpdateCategory(connection);
-  ListCategories(connection);
   // CreateCategory(connection);  
+  // UpdateCategory(connection);
+  // DeleteCategory(connection);
+  // ListCategories(connection);
 }
 
 static void ListCategories(SqlConnection connection)
@@ -79,5 +80,10 @@ static void UpdateCategory(SqlConnection connection)
 
 static void DeleteCategory(SqlConnection connection)
 {
-
+  var deleteCategory = "DELETE FROM [Category] WHERE [Id] = @id";
+  var rows = connection.Execute(deleteCategory, new 
+    {
+      id = new Guid("99CEB1F4-8A24-47F3-9E75-C15212FE4E08")
+    }
+  );
 }
