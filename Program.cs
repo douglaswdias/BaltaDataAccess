@@ -29,7 +29,8 @@ using (var connection = new SqlConnection(connectionString))
   // UpdateCategory(connection);
   // DeleteCategory(connection);
   // ListCategories(connection);
-  ExecuteProcedure(connection);
+  // ExecuteProcedure(connection);
+  ReadProcedure(connection);
 }
 
 static void ListCategories(SqlConnection connection)
@@ -96,4 +97,16 @@ static void ExecuteProcedure(SqlConnection connection)
   var procedure = "[spDeleteStudent]";
   var parameters = new { StudentId = "BDC6E888-C50F-406B-93E1-E156DCF6FA50" };
   var affectedRows = connection.Execute(procedure, parameters, commandType: CommandType.StoredProcedure);
+}
+
+static void ReadProcedure(SqlConnection connection)
+{
+  var procedure = "[spGetCoursesByCategory]";
+  var parameters = new { CategoryId = "09CE0B7B-CFCA-497B-92C0-3290AD9D5142" };
+  var courses = connection.Query(procedure, parameters, commandType: CommandType.StoredProcedure);
+
+  foreach(var item in courses)
+  {
+    Console.WriteLine(item.Id);
+  }
 }
