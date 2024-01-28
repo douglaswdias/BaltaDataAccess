@@ -1,6 +1,8 @@
-﻿using BaltaDataAccess.Models;
+﻿using System.Data;
+using BaltaDataAccess.Models;
 using Dapper;
 using Microsoft.Data.SqlClient;
+
 const string connectionString = "server=localhost\\sqlexpress;database=balta;trusted_connection=True;TrustServerCertificate=True";
 
 // using (var connection = new SqlConnection(connectionString))
@@ -27,6 +29,7 @@ using (var connection = new SqlConnection(connectionString))
   // UpdateCategory(connection);
   // DeleteCategory(connection);
   // ListCategories(connection);
+  ExecuteProcedure(connection);
 }
 
 static void ListCategories(SqlConnection connection)
@@ -86,4 +89,11 @@ static void DeleteCategory(SqlConnection connection)
       id = new Guid("99CEB1F4-8A24-47F3-9E75-C15212FE4E08")
     }
   );
+}
+
+static void ExecuteProcedure(SqlConnection connection)
+{
+  var procedure = "[spDeleteStudent]";
+  var parameters = new { StudentId = "BDC6E888-C50F-406B-93E1-E156DCF6FA50" };
+  var affectedRows = connection.Execute(procedure, parameters, commandType: CommandType.StoredProcedure);
 }
