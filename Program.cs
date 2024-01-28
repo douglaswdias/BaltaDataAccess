@@ -30,7 +30,8 @@ using (var connection = new SqlConnection(connectionString))
   // DeleteCategory(connection);
   // ListCategories(connection);
   // ExecuteProcedure(connection);
-  ReadProcedure(connection);
+  // ReadProcedure(connection);
+  ExecuteScalar(connection);
 }
 
 static void ListCategories(SqlConnection connection)
@@ -44,32 +45,32 @@ static void ListCategories(SqlConnection connection)
   }
 
 static void CreateCategory(SqlConnection connection)
+{
+  var category = new Category();
+  category.Id = Guid.NewGuid();
+  category.Title = "Amazon AWS";
+  category.Url = "amazon";
+  category.Summary = "AWS Cloud";
+  category.Order = 8;
+  category.Description = "Categoria destinada a serviços do AWS";
+  category.Featured = false;
+
+  var insertSql = @"INSERT INTO 
+                      [Category] 
+                    VALUES 
+                      (@Id, @Title, @Url, @Summary, @Order, @Description, @Featured)";
+
+  var rows = connection.Execute(insertSql, new 
   {
-    var category = new Category();
-    category.Id = Guid.NewGuid();
-    category.Title = "Amazon AWS";
-    category.Url = "amazon";
-    category.Summary = "AWS Cloud";
-    category.Order = 8;
-    category.Description = "Categoria destinada a serviços do AWS";
-    category.Featured = false;
-
-    var insertSql = @"INSERT INTO 
-                        [Category] 
-                      VALUES 
-                        (@Id, @Title, @Url, @Summary, @Order, @Description, @Featured)";
-
-    var rows = connection.Execute(insertSql, new 
-    {
-      category.Id,
-      category.Title,
-      category.Url,
-      category.Summary,
-      category.Order,
-      category.Description,
-      category.Featured
-    });
-  }
+    category.Id,
+    category.Title,
+    category.Url,
+    category.Summary,
+    category.Order,
+    category.Description,
+    category.Featured
+  });
+}
 
 static void UpdateCategory(SqlConnection connection)
 {
@@ -110,3 +111,31 @@ static void ReadProcedure(SqlConnection connection)
     Console.WriteLine(item.Id);
   }
 }
+
+static void ExecuteScalar(SqlConnection connection)
+  {
+    var category = new Category();
+    category.Title = "Amazon AWS";
+    category.Url = "Scalar";
+    category.Summary = "Scalar";
+    category.Order = 9;
+    category.Description = "Scalar";
+    category.Featured = false;
+
+    var insertSql = @"INSERT INTO 
+                        [Category] 
+                        OUTPUT inserted.[Id]
+                      VALUES 
+                        (NEWID(), @Title, @Url, @Summary, @Order, @Description, @Featured)";
+
+    var id = connection.ExecuteScalar<Guid>(insertSql, new 
+    {
+      category.Title,
+      category.Url,
+      category.Summary,
+      category.Order,
+      category.Description,
+      category.Featured
+    });
+    Console.WriteLine($"Id da Categoria Criada: {id}");
+  }
