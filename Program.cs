@@ -31,7 +31,8 @@ using (var connection = new SqlConnection(connectionString))
   // ListCategories(connection);
   // ExecuteProcedure(connection);
   // ReadProcedure(connection);
-  ExecuteScalar(connection);
+  // ExecuteScalar(connection);
+  ReadView(connection);
 }
 
 static void ListCategories(SqlConnection connection)
@@ -139,3 +140,14 @@ static void ExecuteScalar(SqlConnection connection)
     });
     Console.WriteLine($"Id da Categoria Criada: {id}");
   }
+
+static void ReadView(SqlConnection connection)
+{
+  var sql = "SELECT * FROM [vwCourses]";
+  var courses = connection.Query(sql);
+
+    foreach (var item in courses)
+    {
+      Console.WriteLine($"{item.Id} - {item.Title}");
+    }
+}
