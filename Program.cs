@@ -22,7 +22,6 @@ const string connectionString = "server=localhost\\sqlexpress;database=balta;tru
 //   }
 // }
 
-
 using (var connection = new SqlConnection(connectionString))
 {
   // CreateCategory(connection);  
@@ -32,7 +31,10 @@ using (var connection = new SqlConnection(connectionString))
   // ExecuteProcedure(connection);
   // ReadProcedure(connection);
   // ExecuteScalar(connection);
-  ReadView(connection);
+  // ReadView(connection);
+  // OneToOne(connection);
+  // OneToMany(connection);
+  // QueryMultiple(connection);
 }
 
 static void ListCategories(SqlConnection connection)
@@ -150,4 +152,89 @@ static void ReadView(SqlConnection connection)
     {
       Console.WriteLine($"{item.Id} - {item.Title}");
     }
+}
+
+static void OneToOne(SqlConnection connection)
+{
+  var sql = @"SELECT * FROM [CareerItem]
+            INNER JOIN [Course] ON [CareerItem].[CourseId] = [Course].[Id]";
+  
+  var items = connection.Query<CareerItem, Course, CareerItem>(
+    sql,
+    (careerItem, course) =>
+    {
+      careerItem.Course = course;
+      return careerItem;
+    },
+    splitOn: "Id");
+
+  foreach (var item in items)
+  {
+    Console.WriteLine($"{item.Title} - Curso: {item.Course.Title}");
+  }
+}
+
+static void OneToMany(SqlConnection connection)
+{
+  var sql = @"SELECT 
+              [Career].[Id], [Career].[Title],[CareerItem].[CareerId], [CareerItem].[Title]
+            FROM 
+              [Career]
+            INNER JOIN 
+              [CareerItem] ON [CareerItem].[CareerId] = [Career].[Id]
+            ORDER BY 
+              [Career].[Title]";
+  
+  var careerList = new List<Career>();
+  var sqlCareers = connection.Query<Career, CareerItem, Career>(
+    sql,
+    (career, careerItem) =>
+    {
+      var careerSql = careerList.Where(x => x.Id == career.Id).FirstOrDefault();
+
+      if(careerSql == null)
+      {
+        careerSql = career;
+        careerSql.CareerItems.Add(careerItem);
+        careerList.Add(careerSql);
+      }
+      else
+      {
+        careerSql.CareerItems.Add(careerItem);
+      }
+
+      return career;
+    },
+    splitOn: "CareerId");
+
+  foreach (var career in careerList)
+  {
+    Console.WriteLine($"{career.Title}");
+    foreach (var item in career.CareerItems)
+    {
+      Console.WriteLine($"- {item.Title}");
+    }
+  }
+}
+
+static void QueryMultiple(SqlConnection connection)
+{
+  var query = @"SELECT * FROM [Category];
+              SELECT * FROM [Course]";
+
+  using(var multi = connection.QueryMultiple(query))
+  {
+    var categories = multi.Read<Category>();
+    var courses = multi.Read<Course>();
+
+    foreach(var item in categories)
+    {
+      Console.WriteLine(item.Title);
+    }
+
+    foreach(var item in courses)
+    {
+      Console.WriteLine(item.Title);
+    }
+  }
 }
